@@ -1510,3 +1510,203 @@ select {
     }
 
 }
+
+
+
+
+/* Soft pink - gentle and natural */
+:root {
+    --neo-bg: #f8eff3;
+    --neo-light: #fffafd;
+    --neo-text: #806c75;
+    --neo-muted: #a7979f;
+    --neo-accent: #d99caf;
+    --neo-accent-dark: #b97e93;
+}
+
+body {
+    background: #263e3e;
+    color: var(--neo-text);
+}
+
+#app {
+    background: var(--neo-bg);
+}
+
+.header h1 {
+    color: #bd879a;
+    text-shadow: none;
+}
+
+/* Cards: remove hard borders and strong shadows */
+.home-card,
+.form-section {
+    background: #fcf7f9;
+    border: 1px solid rgba(255, 255, 255, .55);
+    box-shadow: 0 2px 8px rgba(190, 145, 164, .045);
+}
+
+/* Inputs: shallow, clean, and easy to read */
+.form-group input,
+.form-group textarea,
+.form-group select,
+.item-add-form input {
+    background: #fdf8fa;
+    color: #806c75;
+    border: 1px solid #f2e7ec;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(180, 135, 153, .04);
+    transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus,
+.item-add-form input:focus {
+    background: #fffafd;
+    border-color: #e7c4d0;
+    box-shadow: 0 0 0 3px rgba(217, 156, 175, .08);
+    outline: none;
+}
+
+/* Buttons: soft surfaces without a raised plastic look */
+.primary-button {
+    background: #dfa5b7;
+    box-shadow: 0 2px 5px rgba(190, 130, 150, .10);
+}
+
+.primary-button:hover {
+    background: #d99caf;
+}
+
+.secondary-button {
+    background: #fcf7f9;
+    border: 1px solid #f1e5ea;
+    box-shadow: 0 1px 4px rgba(190, 145, 164, .05);
+}
+
+.primary-button:active,
+.secondary-button:active {
+    transform: scale(.985);
+}
+
+/* Lists and timeline */
+.event-list-card,
+.timeline-item,
+.action-selector,
+.copy-notice,
+.item-list-row,
+.item-timing-empty {
+    background: #fcf7f9;
+    border: 1px solid rgba(255, 255, 255, .6);
+    box-shadow: 0 2px 6px rgba(190, 145, 164, .045);
+}
+
+.event-list-card:hover,
+.item-list-row:hover {
+    background: #fffafd;
+}
+
+.home-timeline-line:before,
+.home-timeline-travel-connector {
+    background: #eadde4;
+}
+
+.home-timeline-line span,
+.home-timeline-travel-dot {
+    background: #d99caf;
+    box-shadow: 0 0 0 1px #f8eff3;
+}
+
+.home-event-time span {
+    background: #f8eaf0;
+    box-shadow: none;
+}
+
+/* Item input area */
+.item-add-form {
+    background: #fffafd;
+    border: 1px solid rgba(255, 255, 255, .7);
+    box-shadow: 0 2px 7px rgba(190, 145, 164, .05);
+}
+
+.item-add-form input {
+    background: #f9f2f5;
+}
+
+/* Item rows and small controls */
+.item-filter-button,
+.item-bulk-button,
+.event-edit-button,
+.event-delete-button,
+.item-timing-button,
+.item-delete-button,
+.item-timing-add-button,
+.data-management-actions button {
+    box-shadow: none;
+}
+
+.item-filter-button,
+.item-bulk-button,
+.event-edit-button,
+.event-delete-button {
+    border-color: #f0e3e9;
+}
+
+.item-list-row input[type="checkbox"] {
+    box-shadow: none;
+    accent-color: var(--neo-accent-dark);
+}
+
+/* Bottom navigation */
+.bottom-nav {
+    background: rgba(250, 244, 247, .97);
+    border-top: 1px solid rgba(255, 255, 255, .7);
+    box-shadow: 0 -2px 8px rgba(190, 145, 164, .055);
+}
+
+.bottom-nav button {
+    color: #a7979f;
+    transition: color .18s ease, background .18s ease;
+}
+
+.bottom-nav button:hover,
+.bottom-nav button:focus-visible {
+    background: rgba(255, 250, 253, .65);
+    color: var(--neo-accent-dark);
+}
+
+.bottom-nav button svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+    fill: none !important;
+    stroke: currentColor;
+    stroke-width: 1.55;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: none;
+}
+
+.bottom-nav small {
+    font-size: 11px;
+    font-weight: 500;
+}
+
+/* Confirmation dialog */
+.delete-confirm-overlay {
+    background: rgba(151, 119, 135, .2);
+}
+
+.delete-confirm-dialog {
+    background: #fcf7f9;
+    border: 1px solid rgba(255, 255, 255, .7);
+    box-shadow: 0 6px 20px rgba(150, 105, 125, .12);
+}
+
+@media (max-width: 600px) {
+    .bottom-nav button svg {
+        width: 22px;
+        height: 22px;
+    }
+}
