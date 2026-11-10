@@ -61,3 +61,14 @@ function deleteItem(id){
     const items=getItems();
     saveItems(items.filter(item=>item.id!==id));
 }
+
+function updateItem(id, name){
+    const trimmedName = String(name || "").trim();
+    if(!trimmedName)return false;
+    const items = getItems();
+    const item = items.find(item => item.id === id);
+    if(!item)return false;
+    item.name = trimmedName;
+    saveItems(items);
+    return true;
+}

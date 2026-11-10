@@ -1069,13 +1069,7 @@ function addTimelineItem(type, existingData = {}) {
         const input = item.querySelector(`.${key}`);
         if (input) input.value = existingData[key] || "";
     });
-
-
-    item.querySelectorAll('input[type="time"]').forEach(input => {
-        input.addEventListener("change", sortTimelineEditor);
-    });
-    sortTimelineEditor();
-
+    // 入力中はDOMを並べ替えない。時系列順への整列は保存時に行う。
 }
 
 function saveEvent(editId = null) {
@@ -1391,6 +1385,10 @@ function createTimingIcon(timing) {
     `;
 }
 
+function createEditIcon() {
+    return `<svg class="edit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5 5 5M4 20l4.2-.9L19 8.3a2.1 2.1 0 0 0-3-3L5.2 16.1 4 20Z"></path></svg>`;
+}
+
 function createTrashIcon() {
     return `
         <span class="trash-icon">
@@ -1404,13 +1402,22 @@ function createTrashIcon() {
     `;
 }
 
+function refreshItemsPage(filter = "all") {
+    const scrollY = window.scrollY || window.pageYOffset || 0;
+    showItemsPage(filter);
+    requestAnimationFrame(() => {
+        window.scrollTo({ top: scrollY, left: 0, behavior: "auto" });
+    });
+}
+
 function showItemsPage(filter = "all") {
     if (
         typeof getItems !== "function" ||
         typeof addItem !== "function" ||
         typeof toggleItem !== "function" ||
         typeof deleteItem !== "function" ||
-        typeof setItemTiming !== "function"
+        typeof setItemTiming !== "function" ||
+        typeof updateItem !== "function"
     ) {
         page.innerHTML = `
             <div class="page-header"><h2>持ち物</h2></div>
@@ -1500,7 +1507,7 @@ function showItemsPage(filter = "all") {
         }
 
         input.value = "";
-        showItemsPage(filter);
+        refreshItemsPage(filter);
     };
 
     morningButton.onclick = () => {
@@ -1516,7 +1523,7 @@ function showItemsPage(filter = "all") {
         }
 
         input.value = "";
-        showItemsPage(filter);
+        refreshItemsPage(filter);
     };
 
     input.onkeydown = event => {
@@ -1536,7 +1543,7 @@ function showItemsPage(filter = "all") {
         uncheckAllButton.onclick = () => {
             const targets = getItems().filter(item => item.checked);
             targets.forEach(item => toggleItem(item.id));
-            showItemsPage(filter);
+            refreshItemsPage(filter);
         };
     }
 
@@ -1544,14 +1551,14 @@ function showItemsPage(filter = "all") {
         checkAllButton.onclick = () => {
             const targets = getItems().filter(item => !item.checked);
             targets.forEach(item => toggleItem(item.id));
-            showItemsPage(filter);
+            refreshItemsPage(filter);
         };
     }
 
     document.querySelectorAll(".item-check").forEach(checkbox => {
         checkbox.onchange = () => {
             toggleItem(checkbox.dataset.id);
-            showItemsPage(filter);
+            refreshItemsPage(filter);
         };
     });
 
@@ -1562,7 +1569,59 @@ function showItemsPage(filter = "all") {
 
             const success = setItemTiming(button.dataset.id, button.dataset.timing);
 
-            if (success) showItemsPage(filter);
+            if (success) refreshItemsPage(filter);
+        };
+    });
+
+    document.querySelectorAll(".item-edit-button").forEach(button => {
+        button.onclick = event => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const item = getItems().find(currentItem => currentItem.id === button.dataset.id);
+            const row = button.closest(".item-list-row");
+            if (!item || !row) return;
+
+            const nameArea = row.querySelector(".item-name");
+            if (!nameArea) return;
+
+            const originalName = item.name;
+            nameArea.outerHTML = `<input type="text" class="item-edit-input" value="${escapeHTML(originalName)}" aria-label="持ち物の名前を編集" maxlength="80">`;
+            const actions = row.querySelector(".item-row-actions");
+            actions.innerHTML = `
+                <button type="button" class="item-edit-save-button" aria-label="保存" title="保存">✓</button>
+                <button type="button" class="item-edit-cancel-button" aria-label="キャンセル" title="キャンセル">×</button>
+            `;
+
+            const editInput = row.querySelector(".item-edit-input");
+            editInput.focus();
+            editInput.select();
+
+            const finishEdit = save => {
+                if (save) {
+                    const success = updateItem(item.id, editInput.value);
+                    if (!success) {
+                        editInput.focus();
+                        editInput.setCustomValidity("持ち物の名前を入力してください");
+                        editInput.reportValidity();
+                        return;
+                    }
+                }
+                refreshItemsPage(filter);
+            };
+
+            actions.querySelector(".item-edit-save-button").onclick = () => finishEdit(true);
+            actions.querySelector(".item-edit-cancel-button").onclick = () => finishEdit(false);
+            editInput.addEventListener("keydown", keyEvent => {
+                if (keyEvent.key === "Enter") {
+                    keyEvent.preventDefault();
+                    finishEdit(true);
+                }
+                if (keyEvent.key === "Escape") {
+                    keyEvent.preventDefault();
+                    finishEdit(false);
+                }
+            });
         };
     });
 
@@ -1577,7 +1636,7 @@ function showItemsPage(filter = "all") {
 
             showDeleteConfirm(item.name, () => {
                 deleteItem(button.dataset.id);
-                showItemsPage(filter);
+                refreshItemsPage(filter);
             });
         };
     });
@@ -1619,6 +1678,9 @@ function createItemHTML(item) {
             </label>
 
             <div class="item-row-actions">
+                <button type="button" class="item-edit-button" data-id="${escapeHTML(item.id)}" aria-label="名前を編集" title="名前を編集">
+                    ${createEditIcon()}
+                </button>
                 <button type="button" class="item-timing-move-button ${moveTiming}" data-id="${escapeHTML(item.id)}" data-timing="${moveTiming}" aria-label="${moveLabel}" title="${moveLabel}">
                     ${createTimingIcon(moveTiming)}
                 </button>
