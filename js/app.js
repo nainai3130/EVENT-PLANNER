@@ -27,6 +27,8 @@ function addItemsStyles() {
 .item-check-label{flex:1;min-width:0;display:flex;align-items:center}
 .item-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .item-row-actions{display:flex;align-items:center;gap:5px;flex:0 0 auto}
+.item-edit-button{width:34px;height:34px;min-height:34px;padding:0;border:1px solid #f0e3e9;border-radius:10px;background:#fffafd;color:#b98599;display:inline-flex;align-items:center;justify-content:center;flex:0 0 34px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.item-edit-button .edit-icon{width:17px;height:17px;display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .item-timing-move-button{width:34px;height:34px;min-height:34px;border-radius:9px}
 .item-delete-button{width:34px;height:34px;min-height:34px;border-radius:9px;background:#fff;border-color:#eadfe2;color:#9b858c}
 .item-delete-button:hover{background:#fff3f5;border-color:#e2c3ca;color:#b56e7b}
@@ -51,7 +53,7 @@ function addItemsStyles() {
 .item-add-form{gap:5px}
 .item-timing-add-button{width:36px;height:36px;min-height:36px}
 .timing-icon{width:17px;height:17px;flex-basis:17px}
-.item-timing-move-button,.item-delete-button{width:33px;height:33px;min-height:33px}
+.item-edit-button,.item-timing-move-button,.item-delete-button{width:33px;height:33px;min-height:33px;flex-basis:33px}
 .item-bulk-actions{gap:6px}
 .item-bulk-button{font-size:10px}
 }
@@ -59,6 +61,57 @@ function addItemsStyles() {
     document.head.appendChild(style);
 }
 addItemsStyles();
+
+// iPhone標準の時間ピッカーを避け、全画面共通でHH:MMを直接入力する。
+// 数字4桁（例: 0930）でも、コロン付き（例: 09:30）でも入力できる。
+document.addEventListener("input", event => {
+    const input = event.target;
+    if (!input.matches(".time-input")) return;
+
+    const digits = input.value.replace(/\D/g, "").slice(0, 4);
+    if (digits.length <= 2) {
+        input.value = digits;
+    } else {
+        input.value = `${digits.slice(0, 2)}:${digits.slice(2)}`;
+    }
+    input.removeAttribute("aria-invalid");
+});
+
+document.addEventListener("blur", event => {
+    const input = event.target;
+    if (!input.matches(".time-input")) return;
+
+    const digits = input.value.replace(/\D/g, "");
+    if (!digits) {
+        input.value = "";
+        input.removeAttribute("aria-invalid");
+        return;
+    }
+
+    let hour;
+    let minute;
+    if (digits.length === 3) {
+        hour = Number(digits.slice(0, 1));
+        minute = Number(digits.slice(1));
+    } else if (digits.length === 4) {
+        hour = Number(digits.slice(0, 2));
+        minute = Number(digits.slice(2));
+    } else if (digits.length <= 2) {
+        hour = Number(digits);
+        minute = 0;
+    } else {
+        input.setAttribute("aria-invalid", "true");
+        return;
+    }
+
+    if (hour > 23 || minute > 59) {
+        input.setAttribute("aria-invalid", "true");
+        return;
+    }
+
+    input.value = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+    input.removeAttribute("aria-invalid");
+}, true);
 
 const ITEM_TYPES = {
     event: "イベント",
@@ -607,18 +660,18 @@ function showEventForm(editId = null, copiedEvent = null) {
             <div class="form-row">
                 <div class="form-group">
                     <label>開場</label>
-                    <input type="time" id="event-open">
+                    <input type="text" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="HH:MM" class="time-input" id="event-open">
                 </div>
 
                 <div class="form-group">
                     <label>開演</label>
-                    <input type="time" id="event-start">
+                    <input type="text" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="HH:MM" class="time-input" id="event-start">
                 </div>
             </div>
 
             <div class="form-group">
                 <label>終演</label>
-                <input type="time" id="event-end">
+                <input type="text" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="HH:MM" class="time-input" id="event-end">
             </div>
 
             <div class="form-group">
@@ -850,18 +903,18 @@ function addTimelineItem(type, existingData = {}) {
             <div class="form-row">
                 <div class="form-group">
                     <label>開場</label>
-                    <input type="time" class="open">
+                    <input type="text" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="HH:MM" class="time-input open">
                 </div>
 
                 <div class="form-group">
                     <label>開演</label>
-                    <input type="time" class="start">
+                    <input type="text" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="HH:MM" class="time-input start">
                 </div>
             </div>
 
             <div class="form-group">
                 <label>終演</label>
-                <input type="time" class="end">
+                <input type="text" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="HH:MM" class="time-input end">
             </div>
 
             <div class="form-group">
@@ -886,12 +939,12 @@ function addTimelineItem(type, existingData = {}) {
             <div class="form-row">
                 <div class="form-group">
                     <label>チェックイン</label>
-                    <input type="time" class="checkin">
+                    <input type="text" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="HH:MM" class="time-input checkin">
                 </div>
 
                 <div class="form-group">
                     <label>チェックアウト</label>
-                    <input type="time" class="checkout">
+                    <input type="text" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="HH:MM" class="time-input checkout">
                 </div>
             </div>
 
@@ -917,12 +970,12 @@ function addTimelineItem(type, existingData = {}) {
             <div class="form-row">
                 <div class="form-group">
                     <label>出発時刻</label>
-                    <input type="time" class="start">
+                    <input type="text" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="HH:MM" class="time-input start">
                 </div>
 
                 <div class="form-group">
                     <label>到着時刻</label>
-                    <input type="time" class="end">
+                    <input type="text" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="HH:MM" class="time-input end">
                 </div>
             </div>
 
@@ -955,12 +1008,12 @@ function addTimelineItem(type, existingData = {}) {
             <div class="form-row">
                 <div class="form-group">
                     <label>出発時刻</label>
-                    <input type="time" class="start">
+                    <input type="text" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="HH:MM" class="time-input start">
                 </div>
 
                 <div class="form-group">
                     <label>到着時刻</label>
-                    <input type="time" class="end">
+                    <input type="text" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="HH:MM" class="time-input end">
                 </div>
             </div>
 
@@ -1000,12 +1053,12 @@ function addTimelineItem(type, existingData = {}) {
             <div class="form-row">
                 <div class="form-group">
                     <label>出発時刻</label>
-                    <input type="time" class="start">
+                    <input type="text" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="HH:MM" class="time-input start">
                 </div>
 
                 <div class="form-group">
                     <label>到着時刻</label>
-                    <input type="time" class="end">
+                    <input type="text" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="HH:MM" class="time-input end">
                 </div>
             </div>
 
@@ -1077,7 +1130,7 @@ function saveEvent(editId = null) {
         const data = {};
 
         item.querySelectorAll("input").forEach(input => {
-            data[input.className] = input.value;
+            data[Array.from(input.classList).find(className => className !== "time-input") || input.className] = input.value;
         });
 
         return {

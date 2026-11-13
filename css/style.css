@@ -280,14 +280,13 @@ select {
 }
 
 .form-group input[type=date],
-.form-group input[type=time] {
+.form-group input.time-input {
     min-height: 48px;
     padding: 8px 11px;
     color: #765f68
 }
 
-.form-group input[type=date]::-webkit-calendar-picker-indicator,
-.form-group input[type=time]::-webkit-calendar-picker-indicator {
+.form-group input[type=date]::-webkit-calendar-picker-indicator {
     opacity: .55;
     cursor: pointer;
     width: 20px;
@@ -295,8 +294,7 @@ select {
     margin-left: 4px
 }
 
-.form-group input[type=date]:focus::-webkit-calendar-picker-indicator,
-.form-group input[type=time]:focus::-webkit-calendar-picker-indicator {
+.form-group input[type=date]:focus::-webkit-calendar-picker-indicator {
     opacity: .8
 }
 
@@ -1793,4 +1791,18 @@ body {
     .item-edit-input {
         font-size: 16px;
     }
+}
+
+
+/* Unified manual time input (HH:MM) */
+.form-group input.time-input {
+    min-height: 48px;
+    padding: 8px 11px;
+    color: #765f68;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .04em;
+}
+.form-group input.time-input[aria-invalid="true"] {
+    border-color: #d98b9a;
+    background: #fff6f7;
 }
